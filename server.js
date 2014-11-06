@@ -1,44 +1,60 @@
 var express = require('express');
-var fs = require('fs');
+var fs      = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var app     = express();
-var async = require("async");
+var async   = require("async");
 
 
 app.get('/scrape', function(req, res) {
 
   url = 'http://www.self-help-and-self-development.com/affirmations.html';
 
+  var asyncTasks = [];
   var json = {
     categories : [],
     affirmations : {}
   }
 
-  request(url, function(error, response, html) {
+  var createCategories = function(callback) {
+    request(url, function(error, response, html) {
 
-    if (!error) {
+      if (!error) {
 
-      var $ = cheerio.load(html)
+        var $ = cheerio.load(html)
 
-      $('.columns_block li').filter(function() {
+        $('.columns_block li').filter(function() {
 
-        var data = $(this);
-        
-        data.each(function(key, value) {
-
-          var category = $(data[key]).find('b').text()
-          json.categories.push(category);
-          console.log(category);
+          var data = $(this);
+          data.each(function(key, value) {
+            var category = $(data[key]).find('b').text()
+            json.categories.push(category);
+            console.log(category);
+          });
 
         });
 
-      });
+        callback(null, 'one');
 
-    } else {
-      console.log(error);
-    }
+      } else {
+        console.log(error);
+      }
 
+    });
+  }
+
+  var writeFile = function() {
+    fs.writeFile('seeds.json', JSON.stringify(json, null, 4), function(err) {
+      console.log('File successfully written.')
+    });
+
+    res.send('Scraping Complete.');
+  }
+
+  asyncTasks.push(createCategories);
+
+  async.parallel(asyncTasks, function() {
+    writeFile();
   });
   
   // for (var i = 0; i < json.categories.length; i++) {
@@ -49,12 +65,6 @@ app.get('/scrape', function(req, res) {
 
   // }
 
-  // This is running FIRST... will need to use ASYNC to handle, HOLLA!
-  fs.writeFile('seeds.json', JSON.stringify(json, null, 4), function(err) {
-    console.log('File successfully written.')
-  });
-
-  res.send('Scraping Complete.');
 
 });
 
