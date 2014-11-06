@@ -1,0 +1,12 @@
+{
+  "name"         : "node-web-scrape",
+  "version"      : "0.0.1",
+  "description"  : "Gonna STEAL some affirmations, what up.",
+  "main"         : "server.js",
+  "author"       : "Kyle Chadha",
+  "dependencies" : {
+    "express"    : "latest",
+    "request"    : "latest",
+    "cheerio"    : "latest"
+  }
+}
