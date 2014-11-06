@@ -8,7 +8,6 @@ var async   = require("async");
 
 app.get('/scrape', function(req, res) {
 
-  // var asyncTasks = [];
   var json = {
     categories : {},
     affirmations : {}
@@ -27,16 +26,13 @@ app.get('/scrape', function(req, res) {
           var $ = cheerio.load(html)
 
           $('.columns_block li').filter(function() {
-
             var data = $(this);
             data.each(function(key, value) {
               var category = $(data[key]).find('b').text(),
                   categoryUrl = $(data[key]).find('a').attr('href')
 
               json.categories[category] = categoryUrl;
-              // console.log(category);
             });
-
           });
 
           callback(null, 'one');
@@ -68,9 +64,7 @@ app.get('/scrape', function(req, res) {
           request(url, function(error, response, html) {
 
             if (!error) {
-
               var $ = cheerio.load(html)
-
               var data = $('#ContentColumn').find('li:not(:has(a))');
 
               data.each(function(key, value) {
@@ -78,7 +72,6 @@ app.get('/scrape', function(req, res) {
               })
 
               callback(null);
-
             }
             else {
               callback(error);
