@@ -52,36 +52,6 @@ app.get('/scrape', function(req, res) {
 
     function(callback) {
 
-      // for (var key in json.categories) {
-      //   if (json.categories.hasOwnProperty(key)) {
-
-      //     var url = json.categories[key];
-      //     // console.log(url);
-
-      //     request(url, function(error, response, html) {
-
-      //       if (!error) {
-
-      //         var $ = cheerio.load(html)
-      //         json.affirmations[key] = [];
-      //         // console.log(json.affirmations);
-
-      //         var data = $('#ContentColumn').find('li:not(:has(a)):has(span)');
-      //         data.each(function(key, value) {
-      //           // console.log($(data[key]).text());
-      //           // json.affirmations[key].push($(data[key]).text());
-      //         })
-
-      //       }
-      //       else {
-      //         console.log(error);
-      //       }
-
-      //     })
-          
-      //   }
-      // }
-
       var categoriesArray = [];
 
       for (var key in json.categories) {
@@ -100,13 +70,11 @@ app.get('/scrape', function(req, res) {
             if (!error) {
 
               var $ = cheerio.load(html)
-              // json.affirmations[key] = [];
-              // console.log(json.affirmations);
 
-              var data = $('#ContentColumn').find('li:not(:has(a)):has(span)');
+              var data = $('#ContentColumn').find('li:not(:has(a))');
+
               data.each(function(key, value) {
-                // console.log($(data[key]).text());
-                // json.affirmations[key].push($(data[key]).text());
+                json.affirmations[category].push($(data[key]).text());
               })
 
               callback(null);
@@ -118,12 +86,10 @@ app.get('/scrape', function(req, res) {
 
           })
 
-      }, callback(null, 'two'));
 
-
-      // async.each(json.categories, 
-
-      // callback(null, 'two');
+      }, function() {
+        callback(null, 'two')
+      });
 
     }
 
@@ -137,21 +103,6 @@ app.get('/scrape', function(req, res) {
     res.send('Scraping Complete.');
 
   })
-
-
-  // asyncTasks.push(createCategories);
-
-  // async.parallel(asyncTasks, function() {
-  // });
-  
-  // for (var i = 0; i < json.categories.length; i++) {
-
-    // $('li *:contains("' + json.categories[i] + '")')[0].click();
-    // console.log($('#ContentColumn'));
-    // console.log(json.categories[i]);
-
-  // }
-
 
 });
 
