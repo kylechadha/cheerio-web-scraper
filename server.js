@@ -8,40 +8,58 @@ var async   = require("async");
 
 app.get('/scrape', function(req, res) {
 
-  url = 'http://www.self-help-and-self-development.com/affirmations.html';
-
   var asyncTasks = [];
   var json = {
-    categories : [],
+    categories : {},
     affirmations : {}
   }
 
-  var createCategories = function(callback) {
-    request(url, function(error, response, html) {
+  async.series([
 
-      if (!error) {
+    function(callback) {
 
-        var $ = cheerio.load(html)
+      url = 'http://www.self-help-and-self-development.com/affirmations.html';
 
-        $('.columns_block li').filter(function() {
+      request(url, function(error, response, html) {
 
-          var data = $(this);
-          data.each(function(key, value) {
-            var category = $(data[key]).find('b').text()
-            json.categories.push(category);
-            console.log(category);
+        if (!error) {
+
+          var $ = cheerio.load(html)
+
+          $('.columns_block li').filter(function() {
+
+            var data = $(this);
+            data.each(function(key, value) {
+              var category = $(data[key]).find('b').text(),
+                  categoryUrl = $(data[key]).find('a').attr('href')
+
+              json.categories[category] = categoryUrl;
+              console.log(category);
+            });
+
           });
 
-        });
+          callback(null, 'one');
 
-        callback(null, 'one');
+        } else {
+          console.log(error);
+        }
 
-      } else {
-        console.log(error);
-      }
+      });
 
-    });
-  }
+    },
+
+    function(callback) {
+
+
+      callback(null, 'two');
+
+    }
+
+
+  ], function() {
+    writeFile();
+  })
 
   var writeFile = function() {
     fs.writeFile('seeds.json', JSON.stringify(json, null, 4), function(err) {
@@ -51,11 +69,10 @@ app.get('/scrape', function(req, res) {
     res.send('Scraping Complete.');
   }
 
-  asyncTasks.push(createCategories);
+  // asyncTasks.push(createCategories);
 
-  async.parallel(asyncTasks, function() {
-    writeFile();
-  });
+  // async.parallel(asyncTasks, function() {
+  // });
   
   // for (var i = 0; i < json.categories.length; i++) {
 
